@@ -49,20 +49,26 @@ public final class RhythmGameServer {
 
         buildArena(world, song, baseX, arenaY, baseZ, length);
 
-        MinecartEntity cart = EntityType.MINECART.create(world);
-        if (cart == null) return;
-        int startLane = 2;
-        double startX = laneX(baseX, startLane) + 0.5;
+        MinecartEntity[] carts = new MinecartEntity[5];
         double startZ = baseZ + 5.5;
-        cart.refreshPositionAndAngles(startX, arenaY + 1.05, startZ, 0.0f, 0.0f);
-        cart.setNoGravity(true);
-        world.spawnEntity(cart);
+        for (int lane = 0; lane < 5; lane++) {
+            MinecartEntity cart = EntityType.MINECART.create(world);
+            if (cart == null) {
+                for (MinecartEntity spawned : carts) if (spawned != null) spawned.discard();
+                return;
+            }
+            cart.refreshPositionAndAngles(laneX(baseX, lane) + 0.5, arenaY + 1.05, startZ, 0.0f, 0.0f);
+            cart.setNoGravity(true);
+            world.spawnEntity(cart);
+            carts[lane] = cart;
+        }
 
-        Session session = new Session(player, cart, song, baseX, arenaY, baseZ, startLane,
+        int startLane = 2;
+        Session session = new Session(player, carts, song, baseX, arenaY, baseZ, startLane,
             new Vec3d(player.getX(), player.getY(), player.getZ()), player.getYaw(), player.getPitch());
         SESSIONS.put(player.getUuid(), session);
-        player.startRiding(cart, true);
-        player.sendMessage(Text.literal("Minecraft Guitar Legends 3D: F G H J K trocam de trilho. Segure as notas longas!"), false);
+        player.startRiding(carts[startLane], true);
+        player.sendMessage(Text.literal("Minecraft Guitar Legends 3D: F G H J K fazem o Steve trocar de carrinho. Segure notas longas!"), false);
         RhythmNetwork.playAudio(player, song, START_DELAY_MS);
     }
 
@@ -162,7 +168,7 @@ public final class RhythmGameServer {
 
     private static final class Session {
         final ServerPlayerEntity player;
-        final MinecartEntity cart;
+        final MinecartEntity[] carts;
         final int song;
         final int baseX;
         final int arenaY;
@@ -183,10 +189,10 @@ public final class RhythmGameServer {
         int activeHold = -1;
         int hudTicks;
 
-        Session(ServerPlayerEntity player, MinecartEntity cart, int song, int baseX, int arenaY, int baseZ,
+        Session(ServerPlayerEntity player, MinecartEntity[] carts, int song, int baseX, int arenaY, int baseZ,
                 int lane, Vec3d origin, float yaw, float pitch) {
             this.player = player;
-            this.cart = cart;
+            this.carts = carts;
             this.song = song;
             this.baseX = baseX;
             this.arenaY = arenaY;
@@ -203,6 +209,15 @@ public final class RhythmGameServer {
             return System.currentTimeMillis() - startAtMs;
         }
 
+        void switchCart(int newLane) {
+            MinecartEntity target = carts[newLane];
+            if (target == null || target.isRemoved()) return;
+            if (player.getVehicle() != target) {
+                player.stopRiding();
+                player.startRiding(target, true);
+            }
+        }
+
         void input(int newLane, boolean pressed) {
             long t = elapsed();
             if (t < -50) return;
@@ -217,6 +232,7 @@ public final class RhythmGameServer {
 
             if (activeHold >= 0 && SongCharts.LANES[song][activeHold] != newLane) failHold();
             lane = newLane;
+            switchCart(newLane);
 
             int[] times = SongCharts.TIMES_MS[song];
             byte[] lanes = SongCharts.LANES[song];
@@ -250,14 +266,18 @@ public final class RhythmGameServer {
         }
 
         boolean tick() {
-            if (player.isRemoved() || cart.isRemoved()) return true;
+            if (player.isRemoved()) return true;
+            for (MinecartEntity cart : carts) if (cart == null || cart.isRemoved()) return true;
+
             long t = elapsed();
             double songTime = Math.max(0L, t) / 1000.0;
             double z = baseZ + 5.5 + songTime * BLOCKS_PER_SECOND;
-            double x = laneX(baseX, lane) + 0.5;
-            cart.requestTeleport(x, arenaY + 1.05, z);
-            cart.setVelocity(0.0, 0.0, 0.0);
-            if (player.getVehicle() != cart) player.startRiding(cart, true);
+            for (int i = 0; i < carts.length; i++) {
+                MinecartEntity cart = carts[i];
+                cart.requestTeleport(laneX(baseX, i) + 0.5, arenaY + 1.05, z);
+                cart.setVelocity(0.0, 0.0, 0.0);
+            }
+            if (player.getVehicle() != carts[lane]) player.startRiding(carts[lane], true);
 
             if (t >= 0) {
                 updateHold(t);
@@ -266,7 +286,7 @@ public final class RhythmGameServer {
 
             if (++hudTicks >= 8) {
                 hudTicks = 0;
-                player.sendMessage(Text.literal("🎸 " + SongCharts.NAMES[song] + "  |  " + LANE_KEYS[lane] +
+                player.sendMessage(Text.literal("🎸 " + SongCharts.NAMES[song] + "  |  Carrinho " + LANE_KEYS[lane] +
                     "  |  Pontos " + score + "  Combo " + combo + "  Erros " + misses), true);
             }
             return t >= SongCharts.DURATIONS_MS[song] + 500L;
@@ -328,7 +348,7 @@ public final class RhythmGameServer {
                         " | Acertos: " + hits + " | Erros: " + misses + " | Maior combo: " + bestCombo), false);
                 }
             }
-            if (!cart.isRemoved()) cart.discard();
+            for (MinecartEntity cart : carts) if (cart != null && !cart.isRemoved()) cart.discard();
         }
     }
 }
