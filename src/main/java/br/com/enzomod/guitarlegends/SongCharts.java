@@ -1,48 +1,93 @@
 package br.com.enzomod.guitarlegends;
 
-import java.util.Base64;
+import java.io.InputStream;
 
 public final class SongCharts {
     private SongCharts() {}
-
-    public static final String[] NAMES = {"Wuthering Heights","Pense no Lula","Solinho do Fora PT","Sabor Picanha","Mega Funk Fora PT","Tropa do Capitao!"};
-    public static final String[] IDS = {"wuthering_heights","pense_no_lula","solinho_fora_pt","sabor_picanha","mega_funk_fora_pt","tropa_do_capitao"};
-    public static final int[] DURATIONS_MS = {279824,147383,147122,148114,166139,122149};
-    private static final String[] DATA = {
-        "AooAAf8DAOgIARcEAecAAegAAf8CAegCAecAAegAAf8DAP8IAP8EAdEAAhYAAegCAecEAegEAecCAf8EAf8AAi0AAf8DAi0CAegDAdAEAhcCAhYDAf4DAegEAdACAdECAdACAegDAecEAf8EAegAAf8AAf8AAf4BAhcCAf4EAegCAhYDAdADAegAAf8CAegCAecCAegEAhYCARYMAQAAAf8AAecAAdEBAhYDAhYAAecEAboCAf4DAdEEAhYDAf8CAf8CAecCAf8DAegCAecCAdECAecDAhYAAf8AAegEAecEAf8DAegDAegDAf4AAegAAf8AAecEAf8EAegDAegDAf4CAf8DAegAAf8AAecEAf8BAegCAf8DAf4DAegAAf8DAf8DAecDAhYBAf8EAf8EAegCAf8AAecAAegCAf8AAf4AAegAAf8CAegBAf4BAdECAecDAf8EAegCAf8AAf8CAecCAf8AAf8CAf8EAecEAegEAegAAf4EAegBAegAAf4AAf8AAegBAf8AAf8AAf4CAegEAf8BAf8CAecEAf8EAf8CAegAAf4CAegCAf8AAegCAf4DAegEAegEAecAAegAAf8AAf8CAf4AAf8EAegAAf8AAecEAegDAf8EAecDAf8CAf8BAegCAecDAf8DAf8CAegCAf4CAf8AAegCAecAAf8AAegAAegDAf4EAhYAAegDAf8DAegDAf4CAf8CAegCAecEAf8CAf8CAf8AAdAAAf8BAf8CAegDAecDAf8DAegCAf8BAdADAf8EAf8CAf8CAf4DAf8CAegCAf8BAecCAf8CAdEAAf4AAegEAegEAf4DAf8DAegDAf8AAecAAf8AAegEAf8EAf4EAegAAegDAf8AAecAAf8AAegEAf4BAf8DAf8AAegDAf8DAecDAf8EAf8AAf8DAf8BAf4EAegBAf8AAecAAegAAf8BAf8AAecAAf8CAf8EAf8BAdABAegEAegAAecCAegAAf8CAecCAhYAAegCAf8EAecCAegDAf8EAf8EAecAAf8AAegAAf8DAf4AAegAAf8EAf8BAf8BAf4BAegCAf8EAecEAf8CAegAAf8CAecCAegAAf8CAecEAegEAf8EAegAAf4BAf8CAegAAecAAf8AAf8BAf8AAegAAf4AAegCAf8EAf8AAecEAegCAf8EAecAAf8BAf8AAegEAecAAf8AAegEAecAAf8AAegAAf8CAf8BAecEAf8EAf8BAf8EAf8AAf4EAdECAf8CAecEAf8AAegAAf8CAecAAf8BAegBAecBAegCAf8AAecAAf8AAegCAf8EAecEAegEAecBAhcEAhYCAf4AAf8AAegAAf8CAf8AAecEAf8CAf8EAf8AAecCAegEAf8EAecCAegAAegDAf4CAf8AAf8CAf8EAegEAf4DAdEEAf8EAecCAf8BAegAAecAAf8AAf8DAegAAf8CAecEAf8AAegBAecEAf8AAegCAecAAegDAf8CAf8AAf4CAf8EAf8EAegBAecEAf8EAegBAf8AAecAAf8AAf8CAf8AAecAAf8CAegBAf8AAecBAegEAf8AAf8AAecBAf8BAegCAecCAegAAf8DAf8EAf4EAdEEAf8CAf8CAf4CAegAAegAAhYDAecCAf8CAegCAf8AAf4BAegEAf8BAecEAf8CAegCAegCAecAAf8AAf8BAf8DAecCAegEAegBAf4BAf8AAf8CAegAAf8AAecAAegDAf8EAf4CAegBAf8AAf8AAf8EAecBAf8AAegCAf8CAf4AAf8EAegBAf8CAecEAegCAf8EAecEAf8CAf8EAegAAecAAf8AAf8DAegCAf4CAf8EAf8AAdABAegDAf8AAegEAecCAf8CAf8CAf8AAecAAf8EAf8CAegDAecBAegAAf8AAecCAf8CAf8CAf8DAecDAf8EAhYCAegEAegBAecEAegEAf8EAecAAegAAf8AAecCAf8CAegBAf8CAf4AAegDAf8EAf8EAecCAegEAegDAf4AAf8AAf8AAegBAecAAegEAhYEAf8EAf8CAecCAegBAegAAf4CAegAAf8AAegAAecBAhYEAf8AAegCAf4AAegAAegAAecCAf8AAegDAf8AAecBAegAAf8BAf8EAecCAegCAf8EAf4EAf8AAegAAegAAf4EAf8EAf8BAegBAf8BAecEAf8EAegAAecCAf8BAf8CAf8CAecCAegDAf8CAecAAf8EAf8A",
-        "AUUCAdACAboCAVwEAdAEAegAAegCAecCAdECAdADANEMALoCAbkBAf8DAdACAdECAdACAbkAAbkCAYsCAegAAdACAdABAdEBANEKAP8AAbkCAdECAbkCAOgJAOgEAOkMANEDAdACAbkCAOgLAOkAAOgIAOgEAbkBAdEBAdAAAbkDAbkBAdEBAdABAOgIANEAAdEBAdAAAdEBAbkCAbkAAdAAAdEBANEIAP8AAbkAAbkDAOkIAOgAAdACAbkAAdECAdACAdEDAbkBAbkAANEIAP8AAdECAbkAAdACAboCAdAAAbkAAdAAALoLARcDAbkCAdAAAdECALoMAP8EAdAAAboBANELAOgCAdABAdEBAdABAdADAboCAbkCAbkDAbkAAOgLAQAAAbkEAbkCAbkBAdEAAdACAdABANEMAOkDAdAEANEKAP8DAboCAbkAAdAAAdEDAbkBAbkAAegEAbkAAbkBAdACAdEBAbkDAdABAbkAAOkJAP8BAbkBAbkCAdEBAdACAbkAAboBAOgMANEBAOgJAP8AAdEDAbkCAbkCAdEAAdACAbkBAbkDAdEEAOgLAOgDAbkCAOkJAOgAAdAAAdEDAbkBAbkCAOgLAP8EAboAAbkDANEJAOgCAdABAdEDAbkBAdABANEJAQADAbkBAdABAdEBAi0CAi0DAdEDAbkBAdADAdEDAbkCAdAEAdECAbkAAbkAAdADAdEDAbkDAdACAdECAdADAbkAAboDAdADAbkDAdEBAbkDAdAEAdECAdAAAbkAAbkBAdEDAdADAbkCAdECAdADAbkBAdEAAbkAAdABAdEAAbkAAbkEAdAAAboAAdAAAdADAdEAAdAAAbkEAdEAAbkEAbkDAbkEAdEDANELAP8DAdACAboDAbkCAdADAbkDAdEAAbkAAegAAdACAbkDAbkCAdEDAbkCAbkAAdEEAdAAAdACAbkDAboCAdADAdADAboAAdAAAegBAhYCAf8CAf4CAdEAAbkDAbkAAOgLAQAAAbkEAbkCAbkBAdEAAdACAdEBAbkDAdAEANEKAP8DAboCAbkAAdAAAdEDAbkBAbkAAOgLAQAAAbkAAbkBAdACAdEBAbkDAdABAboAAOgJAOgBAdABAboEAdABAdACAbkAAboBAOgMANEAAOgJAP8AAboEAbkCAdACAdEAAbkCAdABAbkDAdEEAOgLAOgDAbkCAOkJAOgAAdAAAbkDAdEBAbkCAegEAbkAAbkEANEJAOgCAdABAboDAdABAbkAAOgJAQABAbkBAdADAdEBAi0CAhYDAdEDAdABAdADAdEDAbkCAdACAdECAbkAAbkAAdABAdEBAbkEAdACAdECAbkDAdAAAboDAdADAbkDAdEEAbkDAdAEAdECAbkAAbkAAdACAdEBAdADAbkCAdECAdADAbkDAdECAbkEAbkC",
-        "AKMBAecAAegDAecBAegEAdAAAegAAdADAegCAegAAecBAegBAegEAP8MAOgAAOgJAQAAAf8CAdAAAegAAOgIAP8BAOgIAQAAAdADAegDAecDAdEAAf8EAdAEAegDAdADAf8DAegEAecDAdEEAf4EAdEDAf8DANEIAP8DAegDAecDAf8AAbkDAf8EAdEEAecDAdEDAf4DAegBAegDAdAEAegEAecDAegDAegBAdABAegCAecCAdEAAecCAegCAecAAegCAegAAecAAegDAdABAegAAegAAecAAegCAecDAdECAecCAegCAegAAecCAegCAdAAAegCAegCAecCAdEDAf4CAdEDAf8CAdAAAegDAdACAegCAecCAf8AAegCAecCAboCAf4EAegCAegCAdACAegAAecDAegCAegAAecCAdEDAecCAegDAf8DAecBAegDAdAEAdEBAecBAegCAegBAecAAegAANEJAP8EAegBAecAAegBAegCAdABAegAAecEAegEAegBAecEAegCAecCAdEBAecAAegAAegBAecAAdEAAecBAegDAdAAAQAJAOgAAegEAecAAOgIAQADAecAAegAAegDANEIAP8BAOgLAQAAAecAAegCAecCAegCAOgLAQAAANEIARYCAegAAdADAegDAegDAdAAAf8EAdAEAegDAdADAf8DAdABAegDAegEAecEAegDAegDANEIAP8DAegBAecDAegDAdACAf8EAdAEAegDAegDAecBAegDAegDAecEAegEAecDAdEDAecBAegCAegAAdABAegCAecCAegAAegAAecCAdEAAecAAegDAecBAegAAegAAecAAegCAdADAegCAdACAegCAf8AAecCAdECAdACAf8AAegCAecCAdECAf8DAdADAegCAecAAegDAdACAegCAecCAegAAegCAecCAdEAAf8CAdACAegCAecDAegCAdADAegCAecAAegEAegDAecBAdECAf4AAdEAAegCAecDAdEDAecCAegCAecCAegAAegCAecCAegCAdAAAegBAegDAecDAegBAecEAegCAegAAdAAAegEAecDAegBAecEAegAAegAAecBAdEAAecBAegDAdAAAQAJAOgAAegEAecAAOgIAOkDAf4AAegAAdACAegAAOgJAQAAAecAAegAAegEAecDAdEDAecDAegCAecDAegDAegDAdACAegAAdAAAegDAecDAf8DAdEEAecAAdECAf4CAdEAAecDAegCAbkDAbkEAdEEAdAEAdED",
-        "AhYCAdACAboCAbkDAbkEAdAAAboAAbkDAaIAAYoBAaIDAYsCAYsCAbkAAbkDAbkCAboCAbkDAbkBAbkBAaIAAdEAAbkDAdADAbkBAbkAAboAAdAAAbkEAbkAAboDAbkAANEJANEEAdADAbkDAdEAAbkAAbkDAbkAAbkBAdECAbkDAbkDAbkAANEIAOkCAdABAbkBAOgIANEBAaIBAbkDAboBAbkCAbkBAbkDAdEDAdABAbkDAbkAAbkEAboCAbkCAbkDAdAAAboDAbkDAbkAAbkAAbkEAbkEAboEAdAAAbkDAaIAAYsAAYsAAaICAaIDAaIEAbkBAdABAdECAbkBAbkBAaIBAbkEAbkEAbkEAboAAbkAALkJAQAAAbkCAaIDAdACAdEBAbkBAdACAaICALoLAQACAbkCAbkDAbkEAbkCAdEEAaIAAbkAAdABAbkAANEJAOkAAbkBAbkBAdADAboDAaEBAOkLAOgCAdACAbkDAaICAboBAdADALoJAP8CAbkBANEJAOkBAbkEANEJAOgAAbkBAbkBAbkDAOkJAOgAAaIBAOgJAOgAAbkBAOkJANEEAbkBAOgLAOgCAi0CAdEEAdABAegAAbkBAdAEAdEBAbkBAbkBAaIEAOgJALoCAegBAbkAAbkAAbkBAbkBAdEBAbkDAbkEAbkAAboBAbkAAbkCAbkEAdABAboBAbkDAbkDAbkBAdECAbkAAbkBAbkBAbkDANEJAOgBANEJAOkAAbkBAdAAANEJAOgEANEJAOkDAbkBAbkBANEJAOgAANEMAOgDAbkBAdECANEJAOgAAbkDAdEAAbkBAbkCAbkDAbkDAboAAOgKANECAdABAbkBAOgIANEBAboBAbkDAbkBAaICAbkBAdEDAdADAbkDAdEBAaEAAboEAbkCAbkCAbkDAdEAAbkDAbkDAbkAAbkAAbkEAboEAbkEAdAAAbkDAboEAdADAbkBAbkCAboCAbkBAbkDAaICAdABAbkBAboAAbkAAdAAAbkEAboDAbkDAaIBAdACAdAAAboAAbkAAdADAbkBAaICAaIDAYsDAXQCAYoDAboEAaECAdEEAbkAAbkAAbkBAboAANEJAOgAAbkBAbkBAdEDAbkDAaIBAOgLAOgCAdACAboAAaICAbkBAdADANEJAOgCAboBANEJAOgBAbkEANEJAOgAAbkBAdEBAbkBAbkAAbkBANEJAOgAAYsDAXQCAXMCALoJAOgDAOgKANEBAbkBAboCAdACAdAEAaIBAboBANEJAOgCAbkBAbkBAOgIAOkEAbkBANEIAOgBAbkAAbkAAbkBAboBAbkBAdADAbkBAboAAbkBAbkAAdABAbkDAboBAaIAAdAAANEJAOgDAdEBAbkCANEJAOgAAaIEAdABAbkDANEJAOkBANEJAOgAAbkBAdAAANEJAOkBANEJAOgDAbkBAbkBANEJAOgAAOkMANADAdEDAbkBANEKAOgAANEMAQADAbkDAdADAdECAbkBAbkBAbkBAbkA",
-        "ARcIAS0AAegCAegDAf8BAf4AAf8CAdEBAecEAdEDAdAAAbkAAegBAbkDAdAAAdEAAdAAAdEEAdACAdACAdECAbkDAegCAdAAAbkAAdEEAf4CAf8AAegBAegAAf4DAdEAAdAAAdEDAdACAdAAAdECAdACAdECAdAAAdAEAdECAdACAbkEAdEEAdAAAbkDAdECAdADAdECAdAEAdAEAdEEAbkAAdADAdECAdADAdACAdEEAdAEAdEEAdAAAdAEAdEEAdAEAbkCAdEEAdAEAdEEAdAAAdAEAdEEAdAEAdEBAdAEAdACAboBAbkEAbkAAbkAAdEAAecBAegAAdAEAdEEAdAAAOgMAOgEAdEEAdABAdECAdACAbkEAdEDAdAAAdAEAdEEAdADAbkCAdEAAdAEAdEDAdAAAbkDAdECAdADAdACAdEAAdAEAdEDAdAAAdAEAdEEAdADAbkCAdEAAdAEAdADAdEAAdADAdEEAbkDAdACAegEAdADAbkDAdECAdAEAbkAAegEAegEAbkEAbkAAegCAdACAdABAboEAdAEAdACAdECAbkEAdADAdEAAdAEAdEEAdADAdAEAdEEAbkAAdADAdEAAdADAdEEAdAEAdAEAdECAbkEAegEANELAOgEAOgLAOgEAbkCAegEANELAP8EANELAOkEAdAEAdAEAOkLAOgEAOgLAOgEAdEEAdAEAdADAdEEAdAEAbkEAdECAdACAbkCAdEEAdAAAdADAdEEAdADAdEEAdAEAdAEAdECAbkAAOgKAOgDAdEEAdAEAdEEAdAAAbkCAdEEAdAAAdADAdECAdADAdEEAdAEAdAEAdEBAbkAAdADAdEEAecEAboEAdABAbkAAegAAdAEAdEDAbkCAdAEAdECAdACAbkCAdEDAdAAAOgKAOgDAdEEAdADAdEAAdAEAdAEAdEDAdAEAbkDAdEEAdADAdECAdAEAdAEAbkDAdEAAdADAdECAdADAdACAdEAAdAEAdEDAdAAAbkDAegEAdADAbkCAdEEAdAEAbkDAegAAbkDAdECAdADAdACAdEEAdAEAOgKAOkEAbkAAdADAdECAdADAdAAAdEDAdAAAdEAAdADAdADAdECAbkDAdACAegCAbkEAdEEAdAEAdACAdEEAbkDAdACAdEAAdAEAdEDAdAEAdAEAdEEAdAAAdEEAdAEAbkEAbkDAdEAAdADAdACAdEDAdACAOgKAOkEAdAEAdADAdEEAdAEAdEEAdACAbkCAdEEAdAAAdAAAdEAAdADAegAAbkAAbkAAdEDAdAAAdAAAdEAAdAEAdEAAdADAbkAAdEAAdAAAdACAdEAAdAAAdEAAdADAbkAAdEEAdAAAdAAAdEAAdADAdEAAdAAAdAAAdEBAbkAAdAAAdEDAdAAAdEAAdAAAbkCAdEAAdAAAdAAAdEDAdAEAdEAAdAAAbkAAdECAdAAAdADAdEEAdADAbkDAbkDAboBAbkE",
-        "AooCAf8DAS4MAUUDAegDAecAAegCAecDAdECAecEAegBAf8CAegAAf4DAdECAdADAaICAaIDAegCAdACAegBAecCAf8BAdEAAecDAf8BAegBAecCAegBAecBAegBAdEDAecBAdECAf4CAf8CARcLANEDARYKAOkCAdABAdABAegDAdABAf8CAegCAS4IALoBAecBAdEBAecEAegCAecDAegCAS4KAP8DAi4DAf4CAegCAegBAUUKAOgAAi0BAegCAf8CAecDAS4IANECAdECAecEAf8CAf8CAdACAdEEAecDAegCAegBAecBAegAAecEAdEBAecAAegCAf8CAecEAegBAdADAegDAegBAecBAegEAegAAecBAegBAecCAegCAdABAegCAf8DAhYBAP8JAUUBAegCAegAAecCAkUEAi0DAegBAecCAegDAegCAecAAegBAecCAegEAdAAAegCAegAAf8DAecAAS4LALoDAecBAdEDAecAAegCAegCAecCAf8AARcKAOgCAdAAAdEDAdABAegCAecCAf8BAf8BARcIANECAecCAdEBAdABAegCAecCAegCAdABAegCAf8BAecAAegDAegBAecBAf8CAegBAecBAdEBAdADAegBAecCAegCAf8CARYLAOkDARYJAOkCAbkBAdABAegDAecAAegCAegCAecBAegBAecBAegDAdACAegAAegDAUUKAP8DAi0CAegCAegAAf8BAS0KAOkAAi0CAegCAf4DAegBAf8CAdACAegEAf8DAf8CAdACAdACAegBAegCAecAAegBAecAAegEAdABAegAAf8CAecCAegEAegBAdADAf8DAegBAdABAegDAecAAf8BAegBAdACAf8CAdACAegAAegDAhYBAP8JAUUDAegBAecAAf8CAi0EAi4DAecBAegCAegDAecCAegAAf8BAdACAegEAdAAAegCAf8CAecDAegAAS4LALkAAegBAegBAdAAAegCAecCAS4IALoCAf8AARYKAOkCAdAAAdADAdEBAecCAf8CAegDAecDAegDAegBAecB"
+    public record Chart(int[] times, byte[] masks, short[] holds) {}
+    public static final String[] NAMES = {
+        "Mega Funk Fora PT",
+        "Pense no Lula",
+        "Sabor Picanha",
+        "Solinho do Fora PT",
+        "Tropa do Capitao!",
+        "Wuthering Heights",
+        "Aaron Smith - Dancin - Krono Remix ft. Luvli",
+        "Alan Walker, Dash Berlin & Vikkstar - Better Off (Alone, Pt. III)",
+        "Calvin Harris & Disciples - How Deep Is Your Love",
+        "Clean Bandit - Rockabye (feat. Sean Paul & Anne-Marie)",
+        "Coopex, Nito Onna, CPX - Smells Like Teen Spirit",
+        "David Guetta Feat. Kid Cudi - Memories (Cat Dealers Remix)",
+        "Disclosure - You & Me (Rivo Remix) ft. Eliza Doolittle",
+        "DJ Snake - Let Me Love You ft. Justin Bieber",
+        "Duke Dumont - Ocean Drive (Ivahn Johan Afro House Remix)",
+        "Edward Maya feat. Vika Jigulina - Stereo Love (Twelve Remix)",
+        "Felix Jaehn, Whitney Houston - It's Not Right But It's Okay",
+        "Flip Capella, Emdey, Treetalk - Down Under ft. Leines",
+        "Gabry Ponte x LUM!X x Prezioso - Thunder",
+        "Gryffin, ZOHARA - Remember",
+        "Illenium - Lost (ft. Emilie Brandt)",
+        "Kato feat. Jon - Turn The Lights Off (Dj Dark Remix)",
+        "Lana Del Rey vs Cedric Gervais 'Summertime Sadness' Remix",
+        "Lola Young - Messy (NOVEMBER KID Remix)",
+        "Ofenbach - Overdrive feat. Norma Jean Martine",
+        "R3HAB x A Touch Of Class - All Around The World (La La La)",
+        "Rihanna - S&M (NORTKASH & 5ROCK Remix)",
+        "Sabrina Carpenter Vs Kaaze - Espresso Papi (Djs From Mars Bootleg)",
+        "SAINt JHN - Roses (Imanbek Remix)",
+        "Starley - Call On Me (Ryan Riback Remix)",
+        "The Weeknd - Popular (Mindloco Remix)",
+        "THYPONYX - Seven Nation Army",
+        "Tiësto - The Business"
     };
-
-    public static final int[][] TIMES_MS = new int[DATA.length][];
-    public static final byte[][] LANES = new byte[DATA.length][];
-    public static final byte[][] EXTRA = new byte[DATA.length][];
-
-    static {
-        for (int song = 0; song < DATA.length; song++) decode(song);
-    }
-
-    private static void decode(int song) {
-        byte[] raw = Base64.getDecoder().decode(DATA[song]);
-        int count = raw.length / 3;
-        int[] times = new int[count];
-        byte[] lanes = new byte[count];
-        byte[] extra = new byte[count];
-        int t = 0;
-        for (int i = 0; i < count; i++) {
-            int p = i * 3;
-            int delta = ((raw[p] & 255) << 8) | (raw[p + 1] & 255);
-            int meta = raw[p + 2] & 255;
-            t += delta;
-            times[i] = t;
-            lanes[i] = (byte) (meta & 7);
-            extra[i] = (byte) ((meta >> 3) & 1);
-        }
-        TIMES_MS[song] = times;
-        LANES[song] = lanes;
-        EXTRA[song] = extra;
+    public static final String[] IDS = {
+        "mega_funk_fora_pt",
+        "pense_no_lula",
+        "sabor_picanha",
+        "solinho_fora_pt",
+        "tropa_do_capitao",
+        "wuthering_heights",
+        "aaron_smith_dancin_krono_remix_ft_luvli",
+        "alan_walker_dash_berlin_vikkstar_better_off_alone_pt_iii_off",
+        "calvin_harris_disciples_how_deep_is_your_love",
+        "clean_bandit_rockabye_feat_sean_paul_anne_marie",
+        "coopex_nito_onna_cpx_smells_like_teen_spirit",
+        "david_guetta_feat_kid_cudi_memories_cat_dealers_remix",
+        "disclosure_you_me_rivo_remix_ft_eliza_doolittle",
+        "dj_snake_let_me_love_you_ft_justin_bieber",
+        "duke_dumont_ocean_drive_ivahn_johan_afro_house_remix",
+        "edward_maya_feat_vika_jigulina_stereo_love_twelve_remix",
+        "felix_jaehn_whitney_houston_it_s_not_right_but_it_s_okay",
+        "flip_capella_emdey_treetalk_down_under_ft_leines",
+        "gabry_ponte_x_lum_x_x_prezioso_thunder_dance_video",
+        "gryffin_zohara_remember",
+        "illenium_lost_ft_emilie_brandt",
+        "kato_feat_jon_turn_the_lights_off_dj_dark_remix",
+        "lana_del_rey_vs_cedric_gervais_summertime_sadness_remix",
+        "lola_young_messy_november_kid_remix",
+        "ofenbach_overdrive_feat_norma_jean_martine",
+        "r3hab_x_a_touch_of_class_all_around_the_world_la_la_la",
+        "rihanna_s_m_nortkash_5rock_remix",
+        "sabrina_carpenter_vs_kaaze_espresso_papi_djs_from_mars_bootl",
+        "saint_jhn_roses_imanbek_remix",
+        "starley_call_on_me_ryan_riback_remix",
+        "the_weeknd_popular_mindloco_remix_free_download",
+        "thyponyx_seven_nation_army",
+        "tiesto_the_business"
+    };
+    public static final int[] DURATIONS_MS = {166139, 147383, 148114, 147122, 122149, 279824, 243171, 151081, 260516, 253887, 186027, 270710, 208585, 205323, 234440, 212823, 213426, 179885, 162830, 221739, 200533, 176437, 225675, 124540, 179049, 147830, 201280, 177610, 177853, 197532, 204011, 215226, 191901};
+    public static final byte[] AVG_DIFFICULTY = new byte[]{2, 3, 3, 1, 1, 0, 0, 2, 2, 1, 1, 1, 2, 3, 0, 3, 3, 0, 3, 2, 2, 1, 0, 3, 0, 2, 3, 1, 3, 0, 1, 2, 0};
+    public static final int[] BPM = {129, 129, 136, 123, 123, 117, 117, 129, 123, 136, 117, 123, 162, 129, 117, 129, 129, 123, 136, 123, 136, 129, 123, 129, 129, 123, 123, 129, 123, 103, 117, 129, 123};
+    private static final Chart[][] CACHE = new Chart[NAMES.length][4];
+    public static Chart chart(int song,int difficulty) {
+        song=Math.floorMod(song,NAMES.length); difficulty=Math.max(0,Math.min(3,difficulty));
+        if(CACHE[song][difficulty]!=null)return CACHE[song][difficulty];
+        String path="/assets/guitarlegends/charts/"+IDS[song]+"_"+difficulty+".bin";
+        try(InputStream in=SongCharts.class.getResourceAsStream(path)) {
+            if(in==null)return CACHE[song][difficulty]=new Chart(new int[0],new byte[0],new short[0]);
+            byte[] raw=in.readAllBytes();int n=raw.length/7;int[] times=new int[n];byte[] masks=new byte[n];short[] holds=new short[n];
+            for(int i=0,p=0;i<n;i++,p+=7){times[i]=((raw[p]&255)<<24)|((raw[p+1]&255)<<16)|((raw[p+2]&255)<<8)|(raw[p+3]&255);masks[i]=raw[p+4];holds[i]=(short)(((raw[p+5]&255)<<8)|(raw[p+6]&255));}
+            return CACHE[song][difficulty]=new Chart(times,masks,holds);
+        }catch(Exception e){return CACHE[song][difficulty]=new Chart(new int[0],new byte[0],new short[0]);}
     }
 }
