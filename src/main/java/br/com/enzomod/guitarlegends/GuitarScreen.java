@@ -74,7 +74,7 @@ public class GuitarScreen extends Screen {
         if (client.player == null || client.world == null) return;
         int semitones = SEMITONES[lanes[noteIndex]];
         float pitch = (float) (0.72 * Math.pow(2.0, semitones / 12.0));
-        client.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP, 0.85f, pitch);
+        client.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), 0.85f, pitch);
     }
 
     private void hit(int lane) {
