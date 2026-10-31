@@ -34,7 +34,6 @@ public class GuitarScreen extends Screen {
     private boolean playing = false;
     private final int[] lanes = new int[220];
     private final boolean[] done = new boolean[220];
-    private final boolean[] soundPlayed = new boolean[220];
 
     public GuitarScreen() {
         super(Text.literal("Minecraft Guitar Legends"));
@@ -58,7 +57,6 @@ public class GuitarScreen extends Screen {
             }
             lanes[i] = lane;
             done[i] = false;
-            soundPlayed[i] = false;
         }
         score = combo = misses = 0;
         playing = true;
@@ -67,14 +65,6 @@ public class GuitarScreen extends Screen {
 
     private long time() {
         return (System.nanoTime() - start) / 1_000_000L;
-    }
-
-    private void playNote(int noteIndex) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null || client.world == null) return;
-        int semitones = SEMITONES[lanes[noteIndex]];
-        float pitch = (float) (0.72 * Math.pow(2.0, semitones / 12.0));
-        client.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), 0.85f, pitch);
     }
 
     private void hit(int lane) {
@@ -99,6 +89,10 @@ public class GuitarScreen extends Screen {
     }
 
     private void miss() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player != null && client.world != null) {
+            client.player.playSound(SoundEvents.ENTITY_VILLAGER_NO.value(), 0.8f, 0.65f);
+        }
         misses++;
         combo = 0;
         score = Math.max(0, score - 25);
@@ -141,10 +135,6 @@ public class GuitarScreen extends Screen {
         if (playing) {
             for (int i = 0; i < lanes.length; i++) {
                 long dt = targetTime(i) - t;
-                if (!soundPlayed[i] && dt <= 0) {
-                    soundPlayed[i] = true;
-                    playNote(i);
-                }
                 if (done[i]) continue;
                 if (dt < -180) {
                     done[i] = true;
