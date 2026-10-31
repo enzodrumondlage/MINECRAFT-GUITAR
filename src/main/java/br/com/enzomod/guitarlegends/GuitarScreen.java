@@ -158,7 +158,7 @@ public class GuitarScreen extends Screen {
                 int y = bottom - (int) (dt * (bottom - top) / 1800);
                 int noteWidth = Math.max(15, Math.min(30, laneWidth - 12));
                 int half = noteWidth / 2;
-                c.fill(centerX - half - 4, y - 11, centerX + half + 4, y + 11, 0x553FFFFFF);
+                c.fill(centerX - half - 4, y - 11, centerX + half + 4, y + 11, 0x553FFFFF);
                 c.fill(centerX - half, y - 8, centerX + half, y + 8, COLORS[lane]);
                 c.fill(centerX - half + 4, y - 5, centerX + half - 4, y - 2, 0xCCFFFFFF);
                 c.fill(centerX - half + 3, y + 4, centerX + half - 3, y + 6, 0xAA101010);
