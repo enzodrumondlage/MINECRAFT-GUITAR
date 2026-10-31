@@ -17,12 +17,6 @@ public class GuitarScreen extends Screen {
         "Wuthering Heights", "Pense no Lula", "Solinho do Fora PT",
         "Sabor Picanha", "Mega Funk Fora PT", "Tropa do Capitao!"
     };
-
-    /*
-     * Original demo melodies, made from Minecraft's built-in harp sound.
-     * These are playable backing patterns, not recordings of the named songs.
-     * Each number selects one of the five rhythm lanes.
-     */
     private static final int[][] MELODIES = {
         {0,2,4,2,1,2,3,2,0,2,4,3,2,1,2,3},
         {0,0,2,3,2,1,0,2,3,3,4,3,2,1,0,1},
@@ -32,6 +26,7 @@ public class GuitarScreen extends Screen {
         {0,2,3,4,3,2,1,2,0,2,4,2,3,1,0,1}
     };
     private static final int[] SEMITONES = {0, 3, 5, 7, 10};
+    private static final String[] KEYS = {"F", "G", "H", "J", "K"};
 
     private final Random random = new Random(123);
     private int song = 0, mode = 0, score = 0, combo = 0, misses = 0;
@@ -42,7 +37,7 @@ public class GuitarScreen extends Screen {
     private final boolean[] soundPlayed = new boolean[220];
 
     public GuitarScreen() {
-        super(Text.literal("Guitar Legends"));
+        super(Text.literal("Minecraft Guitar Legends"));
     }
 
     private long interval() {
@@ -57,7 +52,6 @@ public class GuitarScreen extends Screen {
         random.setSeed(song * 91L + mode * 31L);
         int[] melody = MELODIES[song];
         for (int i = 0; i < lanes.length; i++) {
-            // Repeat the original melody with small, deterministic variations.
             int lane = melody[i % melody.length];
             if (i > 0 && i % 16 == 15 && random.nextBoolean()) {
                 lane = random.nextInt(SEMITONES.length);
@@ -78,10 +72,7 @@ public class GuitarScreen extends Screen {
     private void playNote(int noteIndex) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null) return;
-
-        int lane = lanes[noteIndex];
-        int semitones = SEMITONES[lane];
-        // Keep the melody in a comfortable range and give each lane its own pitch.
+        int semitones = SEMITONES[lanes[noteIndex]];
         float pitch = (float) (0.72 * Math.pow(2.0, semitones / 12.0));
         client.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP, 0.85f, pitch);
     }
@@ -116,45 +107,44 @@ public class GuitarScreen extends Screen {
         }
     }
 
-    @Override
-    public void render(DrawContext c, int mx, int my, float delta) {
-        renderBackground(c);
-        c.drawCenteredTextWithShadow(textRenderer, "MINECRAFT GUITAR LEGENDS", width / 2, 15, 0xFFFFCC55);
+    private void drawHighway(DrawContext c, long t) {
+        int highwayWidth = Math.min(500, width - 28);
+        int laneWidth = highwayWidth / 5;
+        int left = (width - laneWidth * 5) / 2;
+        int top = 78;
+        int bottom = height - 82;
+        int hitLine = bottom - 3;
 
-        if (!playing) {
-            c.drawCenteredTextWithShadow(textRenderer, "SELECIONE A MUSICA (CIMA/BAIXO)", width / 2, 45, 0xFFFFFFFF);
-            for (int i = 0; i < SONGS.length; i++) {
-                c.drawCenteredTextWithShadow(textRenderer, (i == song ? "> " : "") + SONGS[i],
-                    width / 2, 70 + i * 17, i == song ? 0xFFFFFF55 : 0xFFFFFFFF);
-            }
-            c.drawCenteredTextWithShadow(textRenderer,
-                "Dificuldade: " + new String[]{"Facil", "Medio", "Dificil", "Impossivel"}[mode] + " (ESQUERDA/DIREITA)",
-                width / 2, 190, 0xFFFFFFFF);
-            c.drawCenteredTextWithShadow(textRenderer, "ENTER jogar | SHIFT sair | DEMO MUSICAL ORIGINAL",
-                width / 2, 215, 0xFF80FF80);
-        } else {
-            long t = time();
-            int w = 40, left = width / 2 - 100, bottom = height - 58, top = 53;
-            c.drawTextWithShadow(textRenderer, "Pontos: " + score + "  Combo: " + combo + "  Erros: " + misses,
-                10, 35, 0xFFFFFFFF);
+        // Outer frame and five dark, separated note lanes.
+        c.fill(left - 5, top - 5, left + laneWidth * 5 + 5, bottom + 43, 0xDD080D1B);
+        c.fill(left - 3, top - 3, left + laneWidth * 5 + 3, bottom + 41, 0xFF29354B);
+        for (int lane = 0; lane < 5; lane++) {
+            int x = left + lane * laneWidth;
+            c.fill(x + 1, top, x + laneWidth - 2, bottom + 35, 0xCC111827);
+            c.fill(x + 1, top, x + 3, bottom + 35, 0xFF263248);
+            c.fill(x + laneWidth - 5, top, x + laneWidth - 3, bottom + 35, 0xFF263248);
 
-            for (int i = 0; i < 5; i++) {
-                int x = left + i * w;
-                c.fill(x, top, x + w - 2, bottom, 0xAA202030);
-                c.fill(x, bottom - 3, x + w - 2, bottom + 30, COLORS[i]);
-                c.drawCenteredTextWithShadow(textRenderer, "FGHJK".substring(i, i + 1),
-                    x + w / 2 - 3, bottom + 8, 0xFFFFFFFF);
+            // Small cross-ties make every lane read like a musical rail.
+            for (int y = top + 12; y < bottom + 32; y += 34) {
+                c.fill(x + 5, y, x + laneWidth - 7, y + 2, 0x553F526D);
             }
 
+            // Colored lane marker at the top.
+            c.fill(x + 5, top + 5, x + laneWidth - 7, top + 10, COLORS[lane]);
+        }
+
+        // The hit line is shared by all five tracks.
+        c.fill(left - 9, hitLine, left + laneWidth * 5 + 9, hitLine + 4, 0xFFEAF6FF);
+        c.fill(left - 9, hitLine - 2, left + laneWidth * 5 + 9, hitLine, 0xFF536D8C);
+
+        // Falling notes: glow, colored body, and a bright center.
+        if (playing) {
             for (int i = 0; i < lanes.length; i++) {
                 long dt = targetTime(i) - t;
-
-                // Play each melody note once, on the exact beat used by the lane chart.
                 if (!soundPlayed[i] && dt <= 0) {
                     soundPlayed[i] = true;
                     playNote(i);
                 }
-
                 if (done[i]) continue;
                 if (dt < -180) {
                     done[i] = true;
@@ -163,12 +153,60 @@ public class GuitarScreen extends Screen {
                 }
                 if (dt > 1800) continue;
 
+                int lane = lanes[i];
+                int centerX = left + lane * laneWidth + laneWidth / 2;
                 int y = bottom - (int) (dt * (bottom - top) / 1800);
-                int x = left + lanes[i] * w;
-                c.fill(x + 3, y - 7, x + w - 5, y + 7, COLORS[lanes[i]]);
+                int noteWidth = Math.max(15, Math.min(30, laneWidth - 12));
+                int half = noteWidth / 2;
+                c.fill(centerX - half - 4, y - 11, centerX + half + 4, y + 11, 0x553FFFFFF);
+                c.fill(centerX - half, y - 8, centerX + half, y + 8, COLORS[lane]);
+                c.fill(centerX - half + 4, y - 5, centerX + half - 4, y - 2, 0xCCFFFFFF);
+                c.fill(centerX - half + 3, y + 4, centerX + half - 3, y + 6, 0xAA101010);
             }
+        }
 
-            if (t > targetTime(lanes.length - 1) + 500) playing = false;
+        // Large colored fret pads and key labels below the hit line.
+        for (int lane = 0; lane < 5; lane++) {
+            int centerX = left + lane * laneWidth + laneWidth / 2;
+            int padWidth = Math.min(36, laneWidth - 10);
+            int half = padWidth / 2;
+            c.fill(centerX - half - 2, bottom + 7, centerX + half + 2, bottom + 35, 0xFF05070D);
+            c.fill(centerX - half, bottom + 9, centerX + half, bottom + 33, COLORS[lane]);
+            c.fill(centerX - half + 4, bottom + 12, centerX + half - 4, bottom + 15, 0xCCFFFFFF);
+            c.drawCenteredTextWithShadow(textRenderer, KEYS[lane], centerX, bottom + 18, 0xFFFFFFFF);
+        }
+    }
+
+    @Override
+    public void render(DrawContext c, int mx, int my, float delta) {
+        renderBackground(c);
+        c.fill(0, 0, width, 48, 0xDD080D1B);
+        c.fill(0, 47, width, 49, 0xFF40516E);
+        c.drawCenteredTextWithShadow(textRenderer, "MINECRAFT GUITAR LEGENDS", width / 2, 8, 0xFFFFCC55);
+        c.drawCenteredTextWithShadow(textRenderer, "GUITAR  -  SISTEMA MUSICAL  -  GUITAR", width / 2, 27, 0xFF9EDBFF);
+
+        if (!playing) {
+            c.drawCenteredTextWithShadow(textRenderer, "ESCOLHA UMA FAIXA  (CIMA / BAIXO)", width / 2, 57, 0xFFFFFFFF);
+            for (int i = 0; i < SONGS.length; i++) {
+                int y = 82 + i * 16;
+                if (y > height - 70) break;
+                c.drawCenteredTextWithShadow(textRenderer, (i == song ? ">  " : "") + SONGS[i],
+                    width / 2, y, i == song ? 0xFFFFFF55 : 0xFFD9E4F5);
+            }
+            c.drawCenteredTextWithShadow(textRenderer,
+                "DIFICULDADE: " + new String[]{"FACIL", "MEDIO", "DIFICIL", "IMPOSSIVEL"}[mode] + "  (ESQUERDA / DIREITA)",
+                width / 2, height - 45, 0xFFFFFFFF);
+            c.drawCenteredTextWithShadow(textRenderer, "ENTER: JOGAR     SHIFT: SAIR", width / 2, height - 28, 0xFF80FF80);
+        } else {
+            c.drawTextWithShadow(textRenderer, "PONTOS " + score, 10, 56, 0xFFFFFFFF);
+            c.drawTextWithShadow(textRenderer, "COMBO " + combo, 10, 69, 0xFFFFD65C);
+            c.drawTextWithShadow(textRenderer, "ERROS " + misses, Math.max(10, width - 80), 56, 0xFFFF7777);
+            drawHighway(c, time());
+            if (!playing) {
+                c.fill(width / 2 - 75, height / 2 - 18, width / 2 + 75, height / 2 + 18, 0xEE080D1B);
+                c.drawCenteredTextWithShadow(textRenderer, "FIM DA MUSICA", width / 2, height / 2 - 5, 0xFFFFD65C);
+                c.drawCenteredTextWithShadow(textRenderer, "SHIFT: VOLTAR", width / 2, height / 2 + 9, 0xFFFFFFFF);
+            }
         }
         super.render(c, mx, my, delta);
     }
