@@ -1,0 +1,8 @@
+{
+  "song.wuthering_heights": {"sounds":[{"name":"guitarlegends:songs/wuthering_heights","stream":true}]},
+  "song.pense_no_lula": {"sounds":[{"name":"guitarlegends:songs/pense_no_lula","stream":true}]},
+  "song.solinho_fora_pt": {"sounds":[{"name":"guitarlegends:songs/solinho_fora_pt","stream":true}]},
+  "song.sabor_picanha": {"sounds":[{"name":"guitarlegends:songs/sabor_picanha","stream":true}]},
+  "song.mega_funk_fora_pt": {"sounds":[{"name":"guitarlegends:songs/mega_funk_fora_pt","stream":true}]},
+  "song.tropa_do_capitao": {"sounds":[{"name":"guitarlegends:songs/tropa_do_capitao","stream":true}]}
+}
