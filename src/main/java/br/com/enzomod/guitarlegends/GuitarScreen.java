@@ -91,7 +91,7 @@ public class GuitarScreen extends Screen {
     private void miss() {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null && client.world != null) {
-            client.player.playSound(SoundEvents.ENTITY_VILLAGER_NO.value(), 0.8f, 0.65f);
+            client.player.playSound(SoundEvents.ENTITY_VILLAGER_NO, 0.8f, 0.65f);
         }
         misses++;
         combo = 0;
